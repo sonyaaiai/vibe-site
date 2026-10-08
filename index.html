@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>每日產業分析報告書</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* 版面概念：上方搜尋列 + 單欄閱讀報告，寬螢幕時指標卡並排；台灣慣例紅漲綠跌 */
+:root{
+  --bg:#EEF2F4; --surface:#FFFFFF; --ink:#14212B; --muted:#5B6B77; --line:#D5DDE2;
+  --accent:#0B6E8A; --accent-soft:#DCEFF4; --up:#C62828; --down:#1B7F4B; --warn:#B26A00;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --font-num:"IBM Plex Mono","SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E161C; --surface:#16222B; --ink:#E7EEF2; --muted:#93A5B1; --line:#27384443;
+  --accent:#4FB8D4; --accent-soft:#12303B; --up:#FF7B72; --down:#5FD398; --warn:#E5A84B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E161C; --surface:#16222B; --ink:#E7EEF2; --muted:#93A5B1; --line:#27384443;
+  --accent:#4FB8D4; --accent-soft:#12303B; --up:#FF7B72; --down:#5FD398; --warn:#E5A84B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.7;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:860px;margin-inline:auto;display:flex;flex-direction:column;gap:20px}
+header .date{font-family:var(--font-num);font-size:13px;color:var(--muted);letter-spacing:.04em}
+h1{font-size:clamp(26px,6vw,36px);font-weight:900;line-height:1.25;margin:4px 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:60ch}
+.search{display:flex;gap:8px}
+.search input{flex:1;min-width:0;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.search button{font:inherit;font-weight:700;padding:0 20px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
+html[data-theme="dark"] .search button{color:#06222B}
+.search input:focus-visible,.search button:focus-visible,.chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:-6px}
+.chip{font:inherit;font-size:14px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.notice{font-size:13px;color:var(--warn);border:1px dashed var(--warn);padding:8px 12px;border-radius:6px}
+.msg{padding:14px 16px;border-radius:8px;background:var(--accent-soft)}
+.company{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 18px;display:flex;flex-direction:column;gap:6px}
+.company .tag{font-family:var(--font-num);font-size:13px;color:var(--accent);font-weight:600}
+.company h2{margin:0;font-size:24px;font-weight:900}
+.company .oneline{margin:0;color:var(--muted)}
+section.block{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 18px;display:flex;flex-direction:column;gap:16px;min-width:0}
+section.block>h3{margin:0;font-size:18px;font-weight:700}
+h3 small{font-weight:400;color:var(--muted);font-size:13px;margin-left:6px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:8px;border-bottom:1px solid var(--line)}
+.bar{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px}
+.bar i{display:block;width:100%;max-width:56px;background:var(--accent);border-radius:4px 4px 0 0;opacity:.45}
+.bar:last-child i{opacity:1}
+.bar b{font-family:var(--font-num);font-size:12px;font-weight:500;white-space:nowrap}
+.years{display:flex;gap:10px;margin-top:-10px}
+.years span{flex:1;text-align:center;font-family:var(--font-num);font-size:12px;color:var(--muted)}
+.yoy{font-size:15px}
+.up{color:var(--up);font-weight:700}.down{color:var(--down);font-weight:700}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.metric{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.metric .k{font-size:13px;color:var(--muted)}
+.metric .v{font-family:var(--font-num);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+.metric .cmp{font-size:12.5px;color:var(--muted)}
+.badge{align-self:flex-start;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin-top:4px}
+.badge.good{background:color-mix(in srgb,var(--down) 16%,transparent);color:var(--down)}
+.badge.mid{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.badge.watch{background:color-mix(in srgb,var(--up) 16%,transparent);color:var(--up)}
+.reading{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.analogy{background:var(--accent-soft);border-radius:8px;padding:14px 16px;font-size:16px}
+.analogy b{display:block;font-size:12px;letter-spacing:.08em;color:var(--accent);margin-bottom:2px}
+dl.model{margin:0;display:grid;grid-template-columns:1fr;gap:14px}
+dl.model div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:12px}
+dl.model dt{font-weight:700;color:var(--accent)}
+dl.model dd{margin:0}
+footer{font-size:12.5px;color:var(--muted)}
+@media(min-width:640px){dl.model{grid-template-columns:1fr 1fr}.company,section.block{padding:24px}}
+@media(prefers-reduced-motion:no-preference){.chip,.search button{transition:border-color .15s,color .15s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="date" id="today"></div>
+    <h1>每日產業分析報告書</h1>
+    <p>輸入公司名稱或股票代號，看財務報表重點與商業模式白話文。</p>
+  </header>
+
+  <form class="search" id="form" role="search">
+    <input id="q" type="search" placeholder="例如：台積電、2317、聯發科" autocomplete="off" aria-label="公司名稱或股票代號">
+    <button type="submit">搜尋</button>
+  </form>
+  <div class="chips" id="chips"></div>
+  <div class="notice">以下皆為示範資料，數字僅供版面與教學展示，不代表公司實際財報，也不是投資建議。</div>
+
+  <main id="out" class="wrap" style="gap:20px"></main>
+
+  <footer>示範資料 · 報告日期依開啟當天自動顯示 · 之後可改接真實資料來源</footer>
+</div>
+
+<script>
+/* 示範資料：想新增公司，複製一筆照格式改即可。revenue 單位：億元新台幣 */
+var DATA = [
+ { id:"2330", name:"台積電", alias:["tsmc","台灣積體電路"], industry:"半導體 · 晶圓代工",
+   oneline:"幫全世界的晶片公司把設計圖變成真的晶片。",
+   years:[2021,2022,2023,2024,2025], revenue:[15874,22639,21617,28943,33800],
+   gm:58, om:47, nm:41, eps:45.2, roe:29, debt:33,
+   avg:{gm:45,om:25,nm:20,roe:15,debt:45},
+   reading:["營收連續五年大致往上，只有一年小幅回檔，成長曲線算穩。","毛利率明顯高於同業，代表它的製程有定價權，客戶願意付高價。","負債比不高，手上現金多，蓋新廠大多靠自己賺的錢。"],
+   analogy:"像一間全球唯一能做出最精細模具的工廠，各大品牌都排隊下單，自己不賣品牌，只賣製造能力。",
+   model:{earn:"客戶丟設計圖過來，代工製造後按片數收費；越先進的製程單價越高。",cust:"手機、電腦、AI 伺服器的晶片設計公司，前幾大客戶占營收比重很高。",moat:"先進製程技術領先，加上長年累積的良率與客戶信任，競爭者很難短期追上。",risk:"客戶集中、新廠投資金額龐大，以及地緣政治與匯率波動。"} },
+ { id:"2317", name:"鴻海", alias:["foxconn","鴻海精密"], industry:"電子製造服務",
+   oneline:"替品牌大廠組裝手機、伺服器與電動車零件。",
+   years:[2021,2022,2023,2024,2025], revenue:[59900,66000,61600,64300,70500],
+   gm:6.5, om:2.9, nm:2.8, eps:11.4, roe:10, debt:62,
+   avg:{gm:8,om:4,nm:3,roe:9,debt:55},
+   reading:["營收規模很大，但毛利率只有個位數，賺的是量，不是單價。","負債比偏高是製造業常見狀況，要同時看現金流是否穩定。","AI 伺服器占比提升時，獲利結構有機會改善。"],
+   analogy:"像全球最大的代工餐廳廚房，幫各家品牌做出成品，薄利多銷，靠規模和效率賺錢。",
+   model:{earn:"接品牌客戶訂單，負責組裝與供應鏈管理，收加工費與零組件價差。",cust:"全球手機、電腦與雲端伺服器品牌。",moat:"龐大的產能、垂直整合的供應鏈與快速量產經驗。",risk:"單一大客戶依賴、毛利率低、各國關稅與生產地點調整成本。"} },
+ { id:"2454", name:"聯發科", alias:["mediatek","mtk"], industry:"半導體 · IC 設計",
+   oneline:"設計手機與智慧裝置裡的「大腦」晶片。",
+   years:[2021,2022,2023,2024,2025], revenue:[4934,5487,4333,5301,5650],
+   gm:48, om:19, nm:21, eps:67.5, roe:23, debt:42,
+   avg:{gm:45,om:20,nm:18,roe:15,debt:45},
+   reading:["營收在手機景氣下滑那年掉了一截，隔年回升，景氣循環看得出來。","毛利率接近同業上緣，產品組合越高階越有利。","每股盈餘（EPS）高，但股價基期也高，需搭配本益比一起看。"],
+   analogy:"像專門設計汽車引擎的工程公司，自己不蓋工廠，設計好後交給代工廠製造再賣給品牌。",
+   model:{earn:"自己設計晶片，委託代工製造後賣給手機、電視、網通品牌，賺的是設計與授權的價值。",cust:"各價位的手機品牌，以及電視、WiFi、車用裝置廠商。",moat:"整合多種功能的晶片設計能力與成本控制。",risk:"手機市場景氣、中國市場政策與高階市場的競爭。"} },
+ { id:"2412", name:"中華電信", alias:["cht","中華電"], industry:"電信服務",
+   oneline:"手機門號、寬頻與企業網路的綜合服務商。",
+   years:[2021,2022,2023,2024,2025], revenue:[2250,2260,2305,2345,2390],
+   gm:38, om:19, nm:16, eps:4.9, roe:9, debt:32,
+   avg:{gm:40,om:18,nm:14,roe:8,debt:45},
+   reading:["營收像一條緩緩往上的斜線，成長小但很穩。","負債比低，現金流穩定，所以配息政策通常是投資人關注焦點。","獲利接近同業平均，優勢在穩定，不在成長速度。"],
+   analogy:"像一座收月租費的水電廠，用戶每個月固定付錢，收入穩，但很難突然暴增。",
+   model:{earn:"月租費、門號與寬頻費用，加上企業專線與雲端、資安服務。",cust:"一般消費者、家庭與企業、政府機關。",moat:"全台基地台與固網基礎建設，加上龐大且黏著度高的用戶數。",risk:"價格競爭、成長空間有限，以及基礎建設持續投資。"} },
+ { id:"2603", name:"長榮", alias:["evergreen","長榮海運"], industry:"航運 · 貨櫃運輸",
+   oneline:"用貨櫃船把貨物運過大海，運價漲跌決定賺多少。",
+   years:[2021,2022,2023,2024,2025], revenue:[5000,5100,2000,2700,2850],
+   gm:25, om:20, nm:19, eps:21.0, roe:14, debt:38,
+   avg:{gm:22,om:15,nm:12,roe:12,debt:50},
+   reading:["營收起伏非常大：運價高峰時暴增，景氣冷卻後一下子腰斬，這是航運的特性。","看單一年度的獲利很容易誤判，要拉長到一個景氣循環來看。","目前負債比不高，是前幾年賺到的現金打下的底子。"],
+   analogy:"像計程車隊，旺季車資翻倍、淡季空車繞圈，賺多賺少很大一部分看天時。",
+   model:{earn:"替客戶運送貨櫃並收取運費，運費隨供需浮動。",cust:"貿易商、製造廠與品牌商的物流部門。",moat:"船隊規模、航線網絡與長期客戶關係。",risk:"運價波動大、新船供給增加，以及全球貿易景氣。"} },
+ { id:"2912", name:"統一超", alias:["7-11","seven","統一超商","7-eleven"], industry:"零售 · 便利商店",
+   oneline:"遍布街頭的 7-ELEVEN，賣的是方便。",
+   years:[2021,2022,2023,2024,2025], revenue:[2900,3000,3300,3500,3700],
+   gm:31, om:5, nm:3.6, eps:11.2, roe:25, debt:70,
+   avg:{gm:28,om:4,nm:3,roe:12,debt:60},
+   reading:["營收每年穩定往上，門市數量與客單價一起成長。","毛利率不算高，但店多量大，加上自有商品拉高了整體獲利。","負債比看起來偏高，部分來自租賃與營運資金，零售業常見。"],
+   analogy:"像社區裡的雜貨店老闆，靠滿街的店面和每天的小額消費，累積出穩定的現金。",
+   model:{earn:"賣商品的價差，加上代收、咖啡、自有品牌食品與加盟主的權利金。",cust:"每天進店消費的上班族、學生與家庭。",moat:"密集的門市據點、物流系統與會員資料。",risk:"人力與租金成本、同業競爭，以及消費習慣的改變。"} }
+];
+
+var $ = function(id){ return document.getElementById(id); };
+
+function fmt(n){ return n.toLocaleString("en-US"); }
+
+function judge(key, val, avg){
+  var lowerBetter = key === "debt";
+  var diff = val - avg;
+  var better = lowerBetter ? diff < 0 : diff > 0;
+  var gap = Math.abs(diff) / avg;
+  if (gap < 0.1) return {cls:"mid", text:"與同業接近"};
+  return better ? {cls:"good", text:lowerBetter ? "低於同業，體質穩" : "高於同業"}
+                : {cls:"watch", text:lowerBetter ? "高於同業，需留意" : "低於同業"};
+}
+
+function render(c){
+  var max = Math.max.apply(null, c.revenue);
+  var bars = c.revenue.map(function(v){
+    return '<div class="bar"><b>'+fmt(v)+'</b><i style="height:'+Math.max(6, v/max*115)+'px"></i></div>';
+  }).join("");
+  var yrs = c.years.map(function(y){ return "<span>"+y+"</span>"; }).join("");
+  var last = c.revenue[c.revenue.length-1], prev = c.revenue[c.revenue.length-2];
+  var g = (last-prev)/prev*100;
+  var yoy = '最新一年營收 ' + (g>=0 ? '<span class="up">年增 +'+g.toFixed(1)+'%</span>' : '<span class="down">年減 '+g.toFixed(1)+'%</span>') + '（紅色代表成長，綠色代表衰退，依台灣習慣）';
+
+  var items = [
+    ["gm","毛利率",c.gm,"%"],["om","營業利益率",c.om,"%"],["nm","稅後淨利率",c.nm,"%"],
+    ["roe","股東權益報酬率",c.roe,"%"],["debt","負債比",c.debt,"%"]
+  ];
+  var metrics = items.map(function(it){
+    var j = judge(it[0], it[2], c.avg[it[0]]);
+    return '<div class="metric"><span class="k">'+it[1]+'</span><span class="v">'+it[2]+it[3]+'</span>'+
+           '<span class="cmp">同業約 '+c.avg[it[0]]+it[3]+'</span><span class="badge '+j.cls+'">'+j.text+'</span></div>';
+  }).join("") + '<div class="metric"><span class="k">每股盈餘 EPS</span><span class="v">'+c.eps+'</span><span class="cmp">單位：元</span></div>';
+
+  var reading = c.reading.map(function(t){ return "<li>"+t+"</li>"; }).join("");
+  var m = c.model;
+
+  $("out").innerHTML =
+   '<div class="company"><span class="tag">'+c.id+' · '+c.industry+'</span><h2>'+c.name+'</h2><p class="oneline">'+c.oneline+'</p></div>'+
+   '<section class="block"><h3>財務報表分析<small>示範資料</small></h3>'+
+     '<div><div class="bars" role="img" aria-label="近五年營收長條圖">'+bars+'</div><div class="years" style="margin-top:6px">'+yrs+'</div>'+
+     '<p class="yoy" style="margin:10px 0 0">營收（億元）。'+yoy+'</p></div>'+
+     '<div class="metrics">'+metrics+'</div>'+
+     '<div><b>白話解讀</b><ul class="reading">'+reading+'</ul></div></section>'+
+   '<section class="block"><h3>商業模式白話文</h3>'+
+     '<div class="analogy"><b>一句話比喻</b>'+c.analogy+'</div>'+
+     '<dl class="model"><div><dt>怎麼賺錢</dt><dd>'+m.earn+'</dd></div><div><dt>客戶是誰</dt><dd>'+m.cust+'</dd></div>'+
+     '<div><dt>競爭優勢</dt><dd>'+m.moat+'</dd></div><div><dt>主要風險</dt><dd>'+m.risk+'</dd></div></dl></section>';
+}
+
+function find(q){
+  q = q.trim().toLowerCase();
+  if (!q) return null;
+  return DATA.filter(function(c){
+    return c.id === q || c.name.toLowerCase().indexOf(q) > -1 || q.indexOf(c.name.toLowerCase()) > -1 ||
+           c.alias.some(function(a){ return a.toLowerCase().indexOf(q) > -1; });
+  })[0] || null;
+}
+
+function notFound(q){
+  var names = DATA.map(function(c){ return c.name+"（"+c.id+"）"; }).join("、");
+  $("out").innerHTML = '<div class="msg">找不到「'+q.replace(/[<>&]/g,"")+'」。目前示範資料有：'+names+'。</div>';
+}
+
+function search(q){
+  var c = find(q);
+  if (c) { $("q").value = c.name; render(c); } else notFound(q);
+}
+
+$("chips").innerHTML = DATA.map(function(c){ return '<button type="button" class="chip" data-n="'+c.name+'">'+c.name+'</button>'; }).join("");
+$("chips").addEventListener("click", function(e){ var n = e.target.getAttribute("data-n"); if (n) search(n); });
+$("form").addEventListener("submit", function(e){ e.preventDefault(); search($("q").value); });
+
+var d = new Date(), w = "日一二三四五六"[d.getDay()];
+$("today").textContent = "報告日期 " + d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate() + "（週" + w + "）";
+
+search("台積電");
+</script>
+
+</body>
+</html>
