@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
 <style>
-/* 版面概念：上方搜尋列 + 單欄閱讀報告，寬螢幕時指標卡並排；台灣慣例紅漲綠跌 */
+/* 版面概念：搜尋列 + 單欄閱讀報告；台灣慣例紅漲綠跌；資料來自證交所／櫃買中心公開資料 */
 :root{
   --bg:#EEF2F4; --surface:#FFFFFF; --ink:#14212B; --muted:#5B6B77; --line:#D5DDE2;
   --accent:#0B6E8A; --accent-soft:#DCEFF4; --up:#C62828; --down:#1B7F4B; --warn:#B26A00;
@@ -15,42 +15,56 @@
   --font-num:"IBM Plex Mono","SF Mono",Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0E161C; --surface:#16222B; --ink:#E7EEF2; --muted:#93A5B1; --line:#27384443;
+  --bg:#0E161C; --surface:#16222B; --ink:#E7EEF2; --muted:#93A5B1; --line:#2B3C48;
   --accent:#4FB8D4; --accent-soft:#12303B; --up:#FF7B72; --down:#5FD398; --warn:#E5A84B; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0E161C; --surface:#16222B; --ink:#E7EEF2; --muted:#93A5B1; --line:#27384443;
+  --bg:#0E161C; --surface:#16222B; --ink:#E7EEF2; --muted:#93A5B1; --line:#2B3C48;
   --accent:#4FB8D4; --accent-soft:#12303B; --up:#FF7B72; --down:#5FD398; --warn:#E5A84B; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.7;padding-inline:16px;padding-block:20px 48px}
 .wrap{max-width:860px;margin-inline:auto;display:flex;flex-direction:column;gap:20px}
-header .date{font-family:var(--font-num);font-size:13px;color:var(--muted);letter-spacing:.04em}
+header .date{font-family:var(--font-num);font-size:13px;color:var(--muted);letter-spacing:.02em}
 h1{font-size:clamp(26px,6vw,36px);font-weight:900;line-height:1.25;margin:4px 0 6px;text-wrap:balance}
 header p{margin:0;color:var(--muted);max-width:60ch}
+.searchbox{position:relative}
 .search{display:flex;gap:8px}
 .search input{flex:1;min-width:0;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 .search button{font:inherit;font-weight:700;padding:0 20px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
-html[data-theme="dark"] .search button{color:#06222B}
-.search input:focus-visible,.search button:focus-visible,.chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:-6px}
+:root[data-theme="dark"] .search button{color:#06222B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .search button{color:#06222B}}
+.search input:focus-visible,.search button:focus-visible,.chip:focus-visible,.sugg button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden}
+.sugg button{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;font:inherit;padding:10px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.sugg button:last-child{border-bottom:0}
+.sugg button:hover,.sugg button.on{background:var(--accent-soft)}
+.sugg .id{font-family:var(--font-num);color:var(--accent);font-size:13px;min-width:3.2em}
+.sugg .ind{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips span{font-size:13px;color:var(--muted)}
 .chip{font:inherit;font-size:14px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
-.notice{font-size:13px;color:var(--warn);border:1px dashed var(--warn);padding:8px 12px;border-radius:6px}
 .msg{padding:14px 16px;border-radius:8px;background:var(--accent-soft)}
 .company{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 18px;display:flex;flex-direction:column;gap:6px}
 .company .tag{font-family:var(--font-num);font-size:13px;color:var(--accent);font-weight:600}
-.company h2{margin:0;font-size:24px;font-weight:900}
-.company .oneline{margin:0;color:var(--muted)}
+.company h2{margin:0;font-size:26px;font-weight:900;line-height:1.3}
+.company .full{margin:0;color:var(--muted);font-size:14px}
+.facts{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px;margin-top:6px}
+.facts span{color:var(--muted)}
+.facts a{color:var(--accent)}
 section.block{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 18px;display:flex;flex-direction:column;gap:16px;min-width:0}
 section.block>h3{margin:0;font-size:18px;font-weight:700}
 h3 small{font-weight:400;color:var(--muted);font-size:13px;margin-left:6px}
-.bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:8px;border-bottom:1px solid var(--line)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.chart h4{margin:0 0 6px;font-size:14px;font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:14px;height:150px;border-bottom:1px solid var(--line)}
 .bar{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px}
-.bar i{display:block;width:100%;max-width:56px;background:var(--accent);border-radius:4px 4px 0 0;opacity:.45}
-.bar:last-child i{opacity:1}
+.bar i{display:block;width:100%;max-width:70px;background:var(--accent);border-radius:4px 4px 0 0}
+.bar.old i{opacity:.4}
 .bar b{font-family:var(--font-num);font-size:12px;font-weight:500;white-space:nowrap}
-.years{display:flex;gap:10px;margin-top:-10px}
-.years span{flex:1;text-align:center;font-family:var(--font-num);font-size:12px;color:var(--muted)}
-.yoy{font-size:15px}
+.bar b.neg{color:var(--up)}
+.labels{display:flex;gap:14px;margin-top:4px}
+.labels span{flex:1;text-align:center;font-size:12px;color:var(--muted)}
+.chart p{margin:8px 0 0;font-size:14px}
 .up{color:var(--up);font-weight:700}.down{color:var(--down);font-weight:700}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .metric{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -61,16 +75,19 @@ h3 small{font-weight:400;color:var(--muted);font-size:13px;margin-left:6px}
 .badge.good{background:color-mix(in srgb,var(--down) 16%,transparent);color:var(--down)}
 .badge.mid{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
 .badge.watch{background:color-mix(in srgb,var(--up) 16%,transparent);color:var(--up)}
-.reading{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.reading{margin:6px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
 .analogy{background:var(--accent-soft);border-radius:8px;padding:14px 16px;font-size:16px}
 .analogy b{display:block;font-size:12px;letter-spacing:.08em;color:var(--accent);margin-bottom:2px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.note.warn{color:var(--warn)}
 dl.model{margin:0;display:grid;grid-template-columns:1fr;gap:14px}
 dl.model div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:12px}
 dl.model dt{font-weight:700;color:var(--accent)}
 dl.model dd{margin:0}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}
+.links a{color:var(--accent)}
 footer{font-size:12.5px;color:var(--muted)}
 @media(min-width:640px){dl.model{grid-template-columns:1fr 1fr}.company,section.block{padding:24px}}
-@media(prefers-reduced-motion:no-preference){.chip,.search button{transition:border-color .15s,color .15s}}
 </style>
 </head>
 <body>
@@ -79,151 +96,249 @@ footer{font-size:12.5px;color:var(--muted)}
   <header>
     <div class="date" id="today"></div>
     <h1>每日產業分析報告書</h1>
-    <p>輸入公司名稱或股票代號，看財務報表重點與商業模式白話文。</p>
+    <p>輸入公司名稱或股票代號，看財務報表重點與商業模式白話文。涵蓋全部上市、上櫃公司。</p>
   </header>
 
-  <form class="search" id="form" role="search">
-    <input id="q" type="search" placeholder="例如：台積電、2317、聯發科" autocomplete="off" aria-label="公司名稱或股票代號">
-    <button type="submit">搜尋</button>
-  </form>
-  <div class="chips" id="chips"></div>
-  <div class="notice">以下皆為示範資料，數字僅供版面與教學展示，不代表公司實際財報，也不是投資建議。</div>
+  <div class="searchbox">
+    <form class="search" id="form" role="search" autocomplete="off">
+      <input id="q" type="search" placeholder="例如：台積電、2317、長榮、環球晶" aria-label="公司名稱或股票代號" aria-autocomplete="list" aria-controls="sugg">
+      <button type="submit">搜尋</button>
+    </form>
+    <div class="sugg" id="sugg" role="listbox" hidden></div>
+  </div>
+  <div class="chips" id="chips"><span>熱門：</span></div>
 
   <main id="out" class="wrap" style="gap:20px"></main>
 
-  <footer>示範資料 · 報告日期依開啟當天自動顯示 · 之後可改接真實資料來源</footer>
+  <footer id="foot"></footer>
 </div>
 
+<script src="data/companies.js"></script>
 <script>
-/* 示範資料：想新增公司，複製一筆照格式改即可。revenue 單位：億元新台幣 */
-var DATA = [
- { id:"2330", name:"台積電", alias:["tsmc","台灣積體電路"], industry:"半導體 · 晶圓代工",
-   oneline:"幫全世界的晶片公司把設計圖變成真的晶片。",
-   years:[2021,2022,2023,2024,2025], revenue:[15874,22639,21617,28943,33800],
-   gm:58, om:47, nm:41, eps:45.2, roe:29, debt:33,
-   avg:{gm:45,om:25,nm:20,roe:15,debt:45},
-   reading:["營收連續五年大致往上，只有一年小幅回檔，成長曲線算穩。","毛利率明顯高於同業，代表它的製程有定價權，客戶願意付高價。","負債比不高，手上現金多，蓋新廠大多靠自己賺的錢。"],
-   analogy:"像一間全球唯一能做出最精細模具的工廠，各大品牌都排隊下單，自己不賣品牌，只賣製造能力。",
-   model:{earn:"客戶丟設計圖過來，代工製造後按片數收費；越先進的製程單價越高。",cust:"手機、電腦、AI 伺服器的晶片設計公司，前幾大客戶占營收比重很高。",moat:"先進製程技術領先，加上長年累積的良率與客戶信任，競爭者很難短期追上。",risk:"客戶集中、新廠投資金額龐大，以及地緣政治與匯率波動。"} },
- { id:"2317", name:"鴻海", alias:["foxconn","鴻海精密"], industry:"電子製造服務",
-   oneline:"替品牌大廠組裝手機、伺服器與電動車零件。",
-   years:[2021,2022,2023,2024,2025], revenue:[59900,66000,61600,64300,70500],
-   gm:6.5, om:2.9, nm:2.8, eps:11.4, roe:10, debt:62,
-   avg:{gm:8,om:4,nm:3,roe:9,debt:55},
-   reading:["營收規模很大，但毛利率只有個位數，賺的是量，不是單價。","負債比偏高是製造業常見狀況，要同時看現金流是否穩定。","AI 伺服器占比提升時，獲利結構有機會改善。"],
-   analogy:"像全球最大的代工餐廳廚房，幫各家品牌做出成品，薄利多銷，靠規模和效率賺錢。",
-   model:{earn:"接品牌客戶訂單，負責組裝與供應鏈管理，收加工費與零組件價差。",cust:"全球手機、電腦與雲端伺服器品牌。",moat:"龐大的產能、垂直整合的供應鏈與快速量產經驗。",risk:"單一大客戶依賴、毛利率低、各國關稅與生產地點調整成本。"} },
- { id:"2454", name:"聯發科", alias:["mediatek","mtk"], industry:"半導體 · IC 設計",
-   oneline:"設計手機與智慧裝置裡的「大腦」晶片。",
-   years:[2021,2022,2023,2024,2025], revenue:[4934,5487,4333,5301,5650],
-   gm:48, om:19, nm:21, eps:67.5, roe:23, debt:42,
-   avg:{gm:45,om:20,nm:18,roe:15,debt:45},
-   reading:["營收在手機景氣下滑那年掉了一截，隔年回升，景氣循環看得出來。","毛利率接近同業上緣，產品組合越高階越有利。","每股盈餘（EPS）高，但股價基期也高，需搭配本益比一起看。"],
-   analogy:"像專門設計汽車引擎的工程公司，自己不蓋工廠，設計好後交給代工廠製造再賣給品牌。",
-   model:{earn:"自己設計晶片，委託代工製造後賣給手機、電視、網通品牌，賺的是設計與授權的價值。",cust:"各價位的手機品牌，以及電視、WiFi、車用裝置廠商。",moat:"整合多種功能的晶片設計能力與成本控制。",risk:"手機市場景氣、中國市場政策與高階市場的競爭。"} },
- { id:"2412", name:"中華電信", alias:["cht","中華電"], industry:"電信服務",
-   oneline:"手機門號、寬頻與企業網路的綜合服務商。",
-   years:[2021,2022,2023,2024,2025], revenue:[2250,2260,2305,2345,2390],
-   gm:38, om:19, nm:16, eps:4.9, roe:9, debt:32,
-   avg:{gm:40,om:18,nm:14,roe:8,debt:45},
-   reading:["營收像一條緩緩往上的斜線，成長小但很穩。","負債比低，現金流穩定，所以配息政策通常是投資人關注焦點。","獲利接近同業平均，優勢在穩定，不在成長速度。"],
-   analogy:"像一座收月租費的水電廠，用戶每個月固定付錢，收入穩，但很難突然暴增。",
-   model:{earn:"月租費、門號與寬頻費用，加上企業專線與雲端、資安服務。",cust:"一般消費者、家庭與企業、政府機關。",moat:"全台基地台與固網基礎建設，加上龐大且黏著度高的用戶數。",risk:"價格競爭、成長空間有限，以及基礎建設持續投資。"} },
- { id:"2603", name:"長榮", alias:["evergreen","長榮海運"], industry:"航運 · 貨櫃運輸",
-   oneline:"用貨櫃船把貨物運過大海，運價漲跌決定賺多少。",
-   years:[2021,2022,2023,2024,2025], revenue:[5000,5100,2000,2700,2850],
-   gm:25, om:20, nm:19, eps:21.0, roe:14, debt:38,
-   avg:{gm:22,om:15,nm:12,roe:12,debt:50},
-   reading:["營收起伏非常大：運價高峰時暴增，景氣冷卻後一下子腰斬，這是航運的特性。","看單一年度的獲利很容易誤判，要拉長到一個景氣循環來看。","目前負債比不高，是前幾年賺到的現金打下的底子。"],
-   analogy:"像計程車隊，旺季車資翻倍、淡季空車繞圈，賺多賺少很大一部分看天時。",
-   model:{earn:"替客戶運送貨櫃並收取運費，運費隨供需浮動。",cust:"貿易商、製造廠與品牌商的物流部門。",moat:"船隊規模、航線網絡與長期客戶關係。",risk:"運價波動大、新船供給增加，以及全球貿易景氣。"} },
- { id:"2912", name:"統一超", alias:["7-11","seven","統一超商","7-eleven"], industry:"零售 · 便利商店",
-   oneline:"遍布街頭的 7-ELEVEN，賣的是方便。",
-   years:[2021,2022,2023,2024,2025], revenue:[2900,3000,3300,3500,3700],
-   gm:31, om:5, nm:3.6, eps:11.2, roe:25, debt:70,
-   avg:{gm:28,om:4,nm:3,roe:12,debt:60},
-   reading:["營收每年穩定往上，門市數量與客單價一起成長。","毛利率不算高，但店多量大，加上自有商品拉高了整體獲利。","負債比看起來偏高，部分來自租賃與營運資金，零售業常見。"],
-   analogy:"像社區裡的雜貨店老闆，靠滿街的店面和每天的小額消費，累積出穩定的現金。",
-   model:{earn:"賣商品的價差，加上代收、咖啡、自有品牌食品與加盟主的權利金。",cust:"每天進店消費的上班族、學生與家庭。",moat:"密集的門市據點、物流系統與會員資料。",risk:"人力與租金成本、同業競爭，以及消費習慣的改變。"} }
-];
+/* ========== 1. 有手寫白話介紹的公司（想加更多，照格式複製一筆）========== */
+var PROFILES = {
+ "2330":{analogy:"像一間全球唯一能做出最精細模具的工廠，各大品牌都排隊下單，自己不賣品牌，只賣製造能力。",
+   earn:"客戶丟設計圖過來，代工製造後按片數收費；越先進的製程單價越高。",cust:"手機、電腦、AI 伺服器的晶片設計公司，前幾大客戶占營收比重很高。",
+   moat:"先進製程技術領先，加上長年累積的良率與客戶信任，競爭者很難短期追上。",risk:"客戶集中、新廠投資金額龐大，以及地緣政治與匯率波動。"},
+ "2317":{analogy:"像全球最大的代工餐廳廚房，幫各家品牌做出成品，薄利多銷，靠規模和效率賺錢。",
+   earn:"接品牌客戶訂單，負責組裝與供應鏈管理，收加工費與零組件價差。",cust:"全球手機、電腦與雲端伺服器品牌。",
+   moat:"龐大的產能、垂直整合的供應鏈與快速量產經驗。",risk:"單一大客戶依賴、毛利率低、各國關稅與生產地點調整成本。"},
+ "2454":{analogy:"像專門設計汽車引擎的工程公司，自己不蓋工廠，設計好後交給代工廠製造再賣給品牌。",
+   earn:"自己設計晶片，委託代工製造後賣給手機、電視、網通品牌，賺的是設計與授權的價值。",cust:"各價位的手機品牌，以及電視、WiFi、車用裝置廠商。",
+   moat:"整合多種功能的晶片設計能力與成本控制。",risk:"手機市場景氣、中國市場政策與高階市場的競爭。"},
+ "2412":{analogy:"像一座收月租費的水電廠，用戶每個月固定付錢，收入穩，但很難突然暴增。",
+   earn:"月租費、門號與寬頻費用，加上企業專線與雲端、資安服務。",cust:"一般消費者、家庭與企業、政府機關。",
+   moat:"全台基地台與固網基礎建設，加上龐大且黏著度高的用戶數。",risk:"價格競爭、成長空間有限，以及基礎建設持續投資。"},
+ "2603":{analogy:"像計程車隊，旺季車資翻倍、淡季空車繞圈，賺多賺少很大一部分看天時。",
+   earn:"替客戶運送貨櫃並收取運費，運費隨供需浮動。",cust:"貿易商、製造廠與品牌商的物流部門。",
+   moat:"船隊規模、航線網絡與長期客戶關係。",risk:"運價波動大、新船供給增加，以及全球貿易景氣。"},
+ "2912":{analogy:"像社區裡的雜貨店老闆，靠滿街的店面和每天的小額消費，累積出穩定的現金。",
+   earn:"賣商品的價差，加上代收、咖啡、自有品牌食品與加盟主的權利金。",cust:"每天進店消費的上班族、學生與家庭。",
+   moat:"密集的門市據點、物流系統與會員資料。",risk:"人力與租金成本、同業競爭，以及消費習慣的改變。"}
+};
 
+/* ========== 2. 各產業的通用白話說明（沒有手寫介紹的公司會顯示這個）========== */
+var INDUSTRY = {
+ "半導體業":{analogy:"像做手機、電腦「大腦」的產業鏈：有人設計、有人製造、有人封裝測試，一環扣一環。",earn:"設計晶片賣給品牌，或幫人代工製造、封裝測試，按數量與製程難度收費。",cust:"手機、電腦、車用與 AI 伺服器廠商。",risk:"景氣循環明顯、庫存調整，以及技術升級要持續大筆投資。"},
+ "電子零組件業":{analogy:"像電子產品的零件行，每一台機器裡都有一點，量大但單價不高。",earn:"生產被動元件、連接器、電路板等零件，賣給組裝廠與品牌。",cust:"電子產品組裝廠與品牌商。",risk:"客戶砍價、原物料漲跌，以及終端產品銷量起伏。"},
+ "生技醫療業":{analogy:"像一場長跑：研發階段燒錢、通過審核後才開始賺錢，很多公司還在跑的路上。",earn:"賣藥品、醫材、保健品，或把研發成果授權給大藥廠收權利金。",cust:"醫院、診所、藥局、經銷商與國際藥廠。",risk:"新藥研發失敗機率高、法規審查時間長，早期公司常處於虧損。"},
+ "光電業":{analogy:"像螢幕與光學的專門工廠，面板、鏡頭、LED 都在這一類。",earn:"生產面板、LED、光學鏡頭與相關材料，賣給電視、手機、車用品牌。",cust:"消費電子、車用與顯示器品牌。",risk:"面板價格波動大、中國同業競爭，以及產能過剩。"},
+ "電腦及週邊設備業":{analogy:"像電腦與伺服器的組裝與品牌商，量大、毛利薄，近年伺服器是亮點。",earn:"設計與製造筆電、伺服器、工業電腦與周邊設備。",cust:"企業、雲端服務商、一般消費者與代工品牌客戶。",risk:"毛利低、客戶集中，以及零組件缺料或漲價。"},
+ "電機機械":{analogy:"像工廠裡的工具店，賣機器與設備給別的工廠使用，訂單看客戶願不願意擴產。",earn:"製造並銷售工具機、自動化設備、馬達與零組件，常搭配維修服務。",cust:"製造業工廠、營造業與公用事業。",risk:"客戶資本支出一縮就影響訂單，以及國際同業競爭。"},
+ "其他電子業":{analogy:"像電子產業裡的雜貨鋪，不屬於主要類別的電子相關公司都放這裡。",earn:"依各公司產品而定，可能是設備、材料、測試或電子相關服務。",cust:"電子製造廠與品牌客戶。",risk:"產品線分散，景氣與客戶集中度需逐家確認。"},
+ "通信網路業":{analogy:"像網路世界的水管與插座，網通設備與電信服務都在這裡。",earn:"賣網通設備（路由器、交換器、基地台），或提供電信、寬頻服務收月租。",cust:"電信業者、企業與一般家庭。",risk:"技術世代交替快、價格競爭，以及大客戶訂單起伏。"},
+ "建材營造":{analogy:"像蓋房子的一整條線：建商買地蓋屋賣出，營造廠接工程，建材商賣材料。",earn:"建商靠推案銷售房屋認列收入，營造靠工程進度請款。",cust:"購屋者、政府與民間業主。",risk:"房市景氣與利率、土地與原物料成本，以及認列收入時間不平均。"},
+ "紡織纖維":{analogy:"像做衣服的上中下游：纖維、布料、成衣，品牌訂單是關鍵。",earn:"生產紗、布料或成衣，賣給運動與時尚品牌。",cust:"國際運動、休閒服飾品牌。",risk:"品牌客戶庫存調整、棉價與油價、匯率。"},
+ "觀光餐旅":{analogy:"像靠人潮吃飯的生意，旅客多就旺，景氣或疫情就受傷。",earn:"經營飯店、餐廳、旅行社或景點，收住宿、餐飲與門票。",cust:"國內外旅客與商務客。",risk:"旅遊人數波動、人事與租金固定成本高。"},
+ "鋼鐵工業":{analogy:"像基礎建設的原料商，鐵價一動，獲利跟著大幅起伏。",earn:"煉鋼、軋鋼後賣給營建、機械、汽車等產業，賺鋼價與成本的價差。",cust:"營造、機械、汽車、家電製造業。",risk:"鐵礦與煤炭成本、中國低價鋼材進口，以及景氣循環。"},
+ "綠能環保":{analogy:"像替地球做長期工程的產業，太陽能、風電、廢棄物處理都屬於這類。",earn:"開發與銷售太陽能、風電設備或電力，或承接廢棄物、水處理服務。",cust:"電業、政府與工廠。",risk:"政策補貼變動、前期投資金額大，以及回收期長。"},
+ "資訊服務業":{analogy:"像企業的電腦總管，幫企業建系統、管資訊安全。",earn:"接軟體開發、系統整合、維運與雲端、資安專案收費。",cust:"企業、金融機構與政府。",risk:"專案認列時間不均、人才成本，以及大案件競標壓力。"},
+ "汽車工業":{analogy:"像一台車背後的整條供應鏈，整車、零件、車用電子都包含在內。",earn:"製造整車或零組件賣給車廠，也包括售後維修市場。",cust:"整車廠、經銷商與維修通路。",risk:"車市景氣、電動車轉型，以及原物料與關稅變化。"},
+ "化學工業":{analogy:"像許多產業背後的原料供應商，從塑膠原料到特殊化學品。",earn:"生產化學原料或特用化學品，賣給下游製造廠。",cust:"電子、紡織、塑膠與營建製造業。",risk:"原油與原料價格波動，以及環保法規成本。"},
+ "數位雲端":{analogy:"像數位世界的新興店面，電商、軟體服務與線上平台多在這裡。",earn:"收訂閱費、廣告費或平台抽成。",cust:"企業用戶與一般網路使用者。",risk:"獲利模式還在驗證、競爭者多，要看用戶成長是否轉成獲利。"},
+ "電子通路業":{analogy:"像電子零件的批發商，在原廠與組裝廠之間牽線、賺價差。",earn:"代理電子零件與晶片，賺進貨與出貨之間的價差。",cust:"電子產品製造廠。",risk:"毛利低、庫存風險，以及代理線被原廠收回。"},
+ "居家生活":{analogy:"像生活中的日用品店，從家具、家電到民生用品。",earn:"生產或銷售居家與生活用品，通路包括門市與電商。",cust:"一般家庭消費者。",risk:"消費景氣、原物料與匯率變動。"},
+ "航運業":{analogy:"像計程車隊，旺季車資翻倍、淡季空車繞圈，賺多賺少很大一部分看運價。",earn:"運送貨櫃、散裝貨或石油並收取運費，運費隨供需浮動。",cust:"貿易商、製造廠與品牌商。",risk:"運價大起大落、新船供給增加，以及全球貿易景氣。"},
+ "食品工業":{analogy:"像每天上桌的生意，需求穩，賺的是品牌與通路。",earn:"生產並銷售食品飲料，經由超市、便利商店與餐飲通路。",cust:"一般消費者與餐飲業者。",risk:"原料價格（小麥、黃豆、油脂）與口味、消費習慣變化。"},
+ "金融保險業":{analogy:"像社會的錢包管理員，銀行、保險、證券各管一塊。",earn:"銀行賺存放款利差與手續費，保險賺保費與投資收益，證券賺手續費與自營。",cust:"個人、企業與政府。",risk:"利率與股市波動、呆帳與投資損失。金融業財報格式特殊，下面的毛利率等指標不適用。"},
+ "金融業":{analogy:"像社會的錢包管理員，銀行、保險、證券各管一塊。",earn:"賺利差、手續費、保費與投資收益。",cust:"個人、企業與政府。",risk:"利率與股市波動、呆帳與投資損失。"},
+ "運動休閒":{analogy:"像運動風潮的製造與品牌端，從球具到自行車到鞋服。",earn:"生產或銷售運動器材與休閒用品，常為國際品牌代工。",cust:"國際品牌與運動愛好者。",risk:"品牌客戶庫存調整與消費景氣。"},
+ "文化創意業":{analogy:"像靠創意與內容吃飯的行業，作品當紅就賺。",earn:"靠影視、遊戲、設計或展演內容獲利。",cust:"觀眾、玩家與廣告主。",risk:"內容成敗不穩、獲利波動大。"},
+ "塑膠工業":{analogy:"像日常用品背後的原料商，從塑膠粒到加工品。",earn:"生產塑膠原料或製品賣給下游廠商。",cust:"電子、家電、包裝與汽車產業。",risk:"原油價格與景氣、環保法規。"},
+ "貿易百貨":{analogy:"像人潮的生意，百貨、超市與電商都屬於這一類。",earn:"賣商品的價差，加上租金與會員收入。",cust:"一般消費者。",risk:"消費景氣、電商競爭與租金人事成本。"},
+ "電器電纜":{analogy:"像建築與工廠的血管與神經，電線電纜是基礎。",earn:"生產電線電纜與電氣設備賣給電力與建築業。",cust:"電力公司、營造業與製造業。",risk:"銅價波動與工程進度。"},
+ "油電燃氣業":{analogy:"像生活必需品的供應商，需求穩，價格常受管制。",earn:"供應電力、天然氣或石油製品，收費受政策影響。",cust:"家庭、工廠與商業用戶。",risk:"燃料成本、管制價格與政策。"},
+ "橡膠工業":{analogy:"像輪胎與橡膠製品的專門廠。",earn:"生產輪胎與橡膠製品，賣給車廠與經銷商。",cust:"車廠、汽車後市場。",risk:"天然橡膠與油價、車市景氣。"},
+ "水泥工業":{analogy:"像蓋房子最基本的材料商，本地性強。",earn:"生產水泥與預拌混凝土，賣給營建工程。",cust:"建商與公共工程。",risk:"營建景氣、能源與環保成本。"},
+ "造紙工業":{analogy:"像紙品與包材的供應商，電商越多越需要紙箱。",earn:"生產紙漿、紙張與紙箱包材。",cust:"印刷、包裝、電商與食品業。",risk:"紙漿與能源價格、景氣循環。"},
+ "玻璃陶瓷":{analogy:"像建築與工業用的基礎材料廠。",earn:"生產玻璃、陶瓷與耐火材料。",cust:"營建與工業客戶。",risk:"能源成本與營建景氣。"},
+ "農業科技":{analogy:"像田裡與工廠之間的橋梁，用科技提升農產品價值。",earn:"種植、養殖或加工農產品並銷售。",cust:"通路商、餐飲業與一般消費者。",risk:"天氣與病蟲害、農產品價格波動。"},
+ "其他":{analogy:"這類公司不屬於特定產業，業務各有不同。",earn:"依各公司業務而定，請參考公司官網的產品說明。",cust:"依公司而定。",risk:"請搭配財報與公司公告逐家確認。"}
+};
+var GENERIC = {analogy:"請參考公司官網的產品說明了解主要業務。",earn:"依公司主要業務而定。",cust:"依公司而定。",risk:"請搭配財報與公司公告確認。"};
+
+/* ========== 3. 工具函式 ========== */
 var $ = function(id){ return document.getElementById(id); };
+var D = window.TW_DATA;
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function fmt(n, d){ return n == null ? "–" : Number(n).toLocaleString("en-US", {maximumFractionDigits: d == null ? 0 : d}); }
+function cls(n){ return n >= 0 ? "up" : "down"; }
+function sign(n){ return (n >= 0 ? "+" : "") + n.toFixed(1) + "%"; }
+function ymLabel(ym){ return (parseInt(ym.slice(0, ym.length - 2), 10) + 1911) + " 年 " + parseInt(ym.slice(-2), 10) + " 月"; }
+function periodLabel(p){ return p ? p[0] + " 年 1–" + (p[1] * 3) + " 月累計" : ""; }
+function dateLabel(s){ return s && s.length === 8 ? s.slice(0,4) + "/" + s.slice(4,6) + "/" + s.slice(6) : (s || "–"); }
 
-function fmt(n){ return n.toLocaleString("en-US"); }
+/* ========== 4. 圖表與指標 ========== */
+function pairChart(title, aLabel, aVal, bLabel, bVal, note){
+  if (aVal == null || bVal == null) return "";
+  var max = Math.max(Math.abs(aVal), Math.abs(bVal), 0.01);
+  function bar(v, l, old){
+    return '<div class="bar' + (old ? " old" : "") + '"><b class="' + (v < 0 ? "neg" : "") + '">' + fmt(v, v < 100 ? 1 : 0) + '</b><i style="height:' + Math.max(4, Math.abs(v) / max * 105) + 'px"></i></div>';
+  }
+  return '<div class="chart"><h4>' + title + '</h4><div class="bars">' + bar(aVal, aLabel, true) + bar(bVal, bLabel, false) +
+    '</div><div class="labels"><span>' + aLabel + '</span><span>' + bLabel + '</span></div>' + (note ? '<p>' + note + '</p>' : '') + '</div>';
+}
 
 function judge(key, val, avg){
-  var lowerBetter = key === "debt";
-  var diff = val - avg;
+  if (val == null || avg == null) return null;
+  var lowerBetter = key === "debt", diff = val - avg;
+  var gap = Math.abs(diff) / Math.max(Math.abs(avg), 1);
+  if (gap < 0.1) return {cls: "mid", text: "與同業接近"};
   var better = lowerBetter ? diff < 0 : diff > 0;
-  var gap = Math.abs(diff) / avg;
-  if (gap < 0.1) return {cls:"mid", text:"與同業接近"};
-  return better ? {cls:"good", text:lowerBetter ? "低於同業，體質穩" : "高於同業"}
-                : {cls:"watch", text:lowerBetter ? "高於同業，需留意" : "低於同業"};
+  return better ? {cls: "good", text: lowerBetter ? "低於同業，體質穩" : "高於同業"}
+                : {cls: "watch", text: lowerBetter ? "高於同業，需留意" : "低於同業"};
 }
 
+function readingList(c, st, indName){
+  var r = [], rv = c.rv;
+  if (rv && rv.cumyoy != null) r.push("今年累計營收比去年同期" + (rv.cumyoy >= 0 ? "成長 " : "衰退 ") + Math.abs(rv.cumyoy).toFixed(1) + "%。");
+  if (rv && rv.yoy != null) r.push(ymLabel(rv.ym) + "單月營收比去年同月" + (rv.yoy >= 0 ? "成長 " : "衰退 ") + Math.abs(rv.yoy).toFixed(1) + "%，可看出最近的動能。");
+  if (c.gm != null && st.gm != null) r.push("毛利率 " + c.gm + "%，" + (c.gm >= st.gm ? "高於" : "低於") + indName + "中位數 " + st.gm + "%，反映產品定價權與成本控制。");
+  if (c.nm != null && c.om != null && c.nm > c.om + 3) r.push("稅後淨利率（" + c.nm + "%）明顯高於營業利益率（" + c.om + "%），代表有投資、利息或匯兌等業外收益，要留意本業賺錢能力。");
+  if (c.nm != null && c.nm < 0) r.push("這段期間稅後虧損，要進一步看是一次性因素還是本業問題。");
+  if (c.debt != null && c.debt > 65) r.push("負債比偏高（" + c.debt + "%），營建、航運、租賃類公司較常見，建議再看現金流與償債能力。");
+  if (c.eps != null) r.push("這段期間每股盈餘（EPS）" + c.eps + " 元。累計數字不能直接當成全年 EPS。");
+  return r;
+}
+
+/* ========== 5. 畫面 ========== */
 function render(c){
-  var max = Math.max.apply(null, c.revenue);
-  var bars = c.revenue.map(function(v){
-    return '<div class="bar"><b>'+fmt(v)+'</b><i style="height:'+Math.max(6, v/max*115)+'px"></i></div>';
-  }).join("");
-  var yrs = c.years.map(function(y){ return "<span>"+y+"</span>"; }).join("");
-  var last = c.revenue[c.revenue.length-1], prev = c.revenue[c.revenue.length-2];
-  var g = (last-prev)/prev*100;
-  var yoy = '最新一年營收 ' + (g>=0 ? '<span class="up">年增 +'+g.toFixed(1)+'%</span>' : '<span class="down">年減 '+g.toFixed(1)+'%</span>') + '（紅色代表成長，綠色代表衰退，依台灣習慣）';
+  var st = D.stats[c.d] || D.stats._all, indName = D.stats[c.d] ? c.d : "全體上市櫃公司";
+  var web = c.w ? (/^https?:/.test(c.w) ? c.w : "http://" + c.w) : "";
+  var html = '<div class="company"><span class="tag">' + esc(c.i) + ' · ' + esc(c.m) + ' · ' + esc(c.d || "未分類") + '</span>' +
+    '<h2>' + esc(c.n) + '</h2><p class="full">' + esc(c.f) + '</p><div class="facts">' +
+    (c.c ? '<div><span>董事長 </span>' + esc(c.c) + '</div>' : '') +
+    (c.e ? '<div><span>成立 </span>' + esc(dateLabel(c.e)) + '</div>' : '') +
+    (c.cap ? '<div><span>資本額 </span>' + fmt(c.cap, 1) + ' 億</div>' : '') +
+    (web ? '<div><a href="' + esc(web) + '" target="_blank" rel="noopener">公司官網</a></div>' : '') +
+    '</div></div>';
 
-  var items = [
-    ["gm","毛利率",c.gm,"%"],["om","營業利益率",c.om,"%"],["nm","稅後淨利率",c.nm,"%"],
-    ["roe","股東權益報酬率",c.roe,"%"],["debt","負債比",c.debt,"%"]
-  ];
-  var metrics = items.map(function(it){
-    var j = judge(it[0], it[2], c.avg[it[0]]);
-    return '<div class="metric"><span class="k">'+it[1]+'</span><span class="v">'+it[2]+it[3]+'</span>'+
-           '<span class="cmp">同業約 '+c.avg[it[0]]+it[3]+'</span><span class="badge '+j.cls+'">'+j.text+'</span></div>';
-  }).join("") + '<div class="metric"><span class="k">每股盈餘 EPS</span><span class="v">'+c.eps+'</span><span class="cmp">單位：元</span></div>';
+  var per = periodLabel(c.p);
+  if (c.t === "ci") {
+    var rv = c.rv, charts = "";
+    if (rv) {
+      charts += pairChart("今年累計營收（億元）", "去年同期", rv.cumly, "今年", rv.cum, rv.cumyoy != null ? '<span class="' + cls(rv.cumyoy) + '">' + sign(rv.cumyoy) + '</span>（累計至' + ymLabel(rv.ym) + '）' : "");
+      charts += pairChart("單月營收（億元）", "去年同月", rv.ly, ymLabel(rv.ym).replace(/^\d+ 年 /, ""), rv.cur, rv.yoy != null ? '<span class="' + cls(rv.yoy) + '">' + sign(rv.yoy) + '</span>' : "");
+    }
+    var items = [["gm","毛利率"],["om","營業利益率"],["nm","稅後淨利率"],["roe","股東權益報酬率（年化估算）"],["debt","負債比"]];
+    var metrics = items.map(function(it){
+      var v = c[it[0]]; if (v == null) return "";
+      var j = judge(it[0], v, st[it[0]]);
+      return '<div class="metric"><span class="k">' + it[1] + '</span><span class="v">' + v + '%</span>' +
+        (st[it[0]] != null ? '<span class="cmp">同業中位數 ' + st[it[0]] + '%</span>' : '') + (j ? '<span class="badge ' + j.cls + '">' + j.text + '</span>' : '') + '</div>';
+    }).join("") + (c.eps != null ? '<div class="metric"><span class="k">每股盈餘 EPS</span><span class="v">' + c.eps + '</span><span class="cmp">單位：元（' + per + '）</span></div>' : "");
+    var money = '<p class="note">' + per + '：營收 ' + fmt(c.rev, 1) + ' 億、營業利益 ' + fmt(c.op, 1) + ' 億、稅後淨利 ' + fmt(c.ni, 1) + ' 億。同業比較對象：' + esc(indName) + (st.n ? '（' + st.n + ' 家）' : '') + '。</p>';
+    html += '<section class="block"><h3>財務報表分析<small>' + per + '</small></h3>' +
+      (charts ? '<div class="charts">' + charts + '</div>' : '') + '<div class="metrics">' + metrics + '</div>' + money +
+      '<div><b>白話解讀</b><ul class="reading">' + readingList(c, st, indName).map(function(t){ return '<li>' + t + '</li>'; }).join("") + '</ul>' +
+      '<p class="note" style="margin-top:8px">解讀依數字自動產生，只是起點，不是投資建議。</p></div></section>';
+  } else if (c.t === "fin") {
+    html += '<section class="block"><h3>財務報表分析<small>' + per + '</small></h3><div class="metrics">' +
+      '<div class="metric"><span class="k">營業收入（億元）</span><span class="v">' + fmt(c.rev, 1) + '</span></div>' +
+      '<div class="metric"><span class="k">稅後淨利（億元）</span><span class="v">' + fmt(c.ni, 1) + '</span></div>' +
+      '<div class="metric"><span class="k">每股盈餘 EPS</span><span class="v">' + (c.eps == null ? "–" : c.eps) + '</span><span class="cmp">單位：元</span></div></div>' +
+      '<p class="note warn">金融保險業的財報格式和一般公司不同（沒有毛利率、營業利益率），所以只顯示簡版數字。</p></section>';
+  } else {
+    html += '<section class="block"><h3>財務報表分析</h3><p class="note warn">目前公開資料中找不到這家公司最近一期的財報（可能是新上市櫃或尚未公告）。</p></section>';
+  }
 
-  var reading = c.reading.map(function(t){ return "<li>"+t+"</li>"; }).join("");
-  var m = c.model;
+  var p = PROFILES[c.i], ind = INDUSTRY[c.d] || GENERIC, m = p || ind;
+  var q = encodeURIComponent(c.n + " 主要產品 商業模式");
+  html += '<section class="block"><h3>商業模式白話文' + (p ? '' : '<small>' + esc(c.d || "") + ' 產業通用說明</small>') + '</h3>' +
+    '<div class="analogy"><b>一句話比喻</b>' + m.analogy + '</div><dl class="model">' +
+    '<div><dt>怎麼賺錢</dt><dd>' + m.earn + '</dd></div><div><dt>客戶是誰</dt><dd>' + m.cust + '</dd></div>' +
+    (p ? '<div><dt>競爭優勢</dt><dd>' + p.moat + '</dd></div>' : '') +
+    '<div><dt>主要風險</dt><dd>' + m.risk + '</dd></div></dl>' +
+    (p ? '' : '<p class="note">這是整個產業的共通說明，不是針對' + esc(c.n) + '本身。想知道它實際賣什麼，請看官網或年報。</p>') +
+    '<div class="links"><a href="https://www.google.com/search?q=' + q + '" target="_blank" rel="noopener">搜尋這家公司的業務介紹</a>' +
+    '<a href="https://mops.twse.com.tw/mops/#/web/home" target="_blank" rel="noopener">公開資訊觀測站</a></div></section>';
 
-  $("out").innerHTML =
-   '<div class="company"><span class="tag">'+c.id+' · '+c.industry+'</span><h2>'+c.name+'</h2><p class="oneline">'+c.oneline+'</p></div>'+
-   '<section class="block"><h3>財務報表分析<small>示範資料</small></h3>'+
-     '<div><div class="bars" role="img" aria-label="近五年營收長條圖">'+bars+'</div><div class="years" style="margin-top:6px">'+yrs+'</div>'+
-     '<p class="yoy" style="margin:10px 0 0">營收（億元）。'+yoy+'</p></div>'+
-     '<div class="metrics">'+metrics+'</div>'+
-     '<div><b>白話解讀</b><ul class="reading">'+reading+'</ul></div></section>'+
-   '<section class="block"><h3>商業模式白話文</h3>'+
-     '<div class="analogy"><b>一句話比喻</b>'+c.analogy+'</div>'+
-     '<dl class="model"><div><dt>怎麼賺錢</dt><dd>'+m.earn+'</dd></div><div><dt>客戶是誰</dt><dd>'+m.cust+'</dd></div>'+
-     '<div><dt>競爭優勢</dt><dd>'+m.moat+'</dd></div><div><dt>主要風險</dt><dd>'+m.risk+'</dd></div></dl></section>';
+  $("out").innerHTML = html;
+  try { history.replaceState(null, "", "#" + c.i); } catch (e) {}
 }
 
-function find(q){
+/* ========== 6. 搜尋 ========== */
+function match(q){
   q = q.trim().toLowerCase();
-  if (!q) return null;
-  return DATA.filter(function(c){
-    return c.id === q || c.name.toLowerCase().indexOf(q) > -1 || q.indexOf(c.name.toLowerCase()) > -1 ||
-           c.alias.some(function(a){ return a.toLowerCase().indexOf(q) > -1; });
-  })[0] || null;
+  if (!q) return [];
+  var exact = [], starts = [], has = [];
+  D.companies.forEach(function(c){
+    var n = c.n.toLowerCase(), f = c.f.toLowerCase();
+    if (c.i === q || n === q) exact.push(c);
+    else if (c.i.indexOf(q) === 0 || n.indexOf(q) === 0) starts.push(c);
+    else if (n.indexOf(q) > -1 || f.indexOf(q) > -1) has.push(c);
+  });
+  return exact.concat(starts, has);
 }
-
-function notFound(q){
-  var names = DATA.map(function(c){ return c.name+"（"+c.id+"）"; }).join("、");
-  $("out").innerHTML = '<div class="msg">找不到「'+q.replace(/[<>&]/g,"")+'」。目前示範資料有：'+names+'。</div>';
+var current = [], onIdx = -1;
+function showSugg(list){
+  current = list.slice(0, 8); onIdx = -1;
+  var box = $("sugg");
+  if (!current.length) { box.hidden = true; return; }
+  box.innerHTML = current.map(function(c, i){
+    return '<button type="button" role="option" data-i="' + i + '"><span class="id">' + esc(c.i) + '</span><span>' + esc(c.n) + '</span><span class="ind">' + esc(c.d) + '</span></button>';
+  }).join("");
+  box.hidden = false;
 }
-
-function search(q){
-  var c = find(q);
-  if (c) { $("q").value = c.name; render(c); } else notFound(q);
+function pick(c){ $("q").value = c.n; $("sugg").hidden = true; render(c); }
+function submit(){
+  var list = match($("q").value);
+  if (list.length === 1 || (list.length && (list[0].i === $("q").value.trim() || list[0].n === $("q").value.trim()))) return pick(list[0]);
+  if (list.length > 1) { $("out").innerHTML = '<div class="msg">找到 ' + list.length + ' 家符合的公司，請從上方清單點選一家。</div>'; return showSugg(list); }
+  $("sugg").hidden = true;
+  $("out").innerHTML = '<div class="msg">找不到「' + esc($("q").value) + '」。請試試公司簡稱（例如：台積電）、股票代號（例如：2330），或名稱中的幾個字。目前收錄上市、上櫃共 ' + D.companies.length + ' 家，不含興櫃與未上市公司。</div>';
 }
+$("q").addEventListener("input", function(){ showSugg(match(this.value)); });
+$("q").addEventListener("keydown", function(e){
+  var b = $("sugg").querySelectorAll("button");
+  if (e.key === "ArrowDown" && b.length) { e.preventDefault(); onIdx = (onIdx + 1) % b.length; }
+  else if (e.key === "ArrowUp" && b.length) { e.preventDefault(); onIdx = (onIdx - 1 + b.length) % b.length; }
+  else if (e.key === "Enter" && onIdx > -1) { e.preventDefault(); return pick(current[onIdx]); }
+  else if (e.key === "Escape") { $("sugg").hidden = true; return; }
+  else return;
+  b.forEach(function(x, i){ x.classList.toggle("on", i === onIdx); });
+});
+$("sugg").addEventListener("click", function(e){ var b = e.target.closest("button"); if (b) pick(current[+b.getAttribute("data-i")]); });
+document.addEventListener("click", function(e){ if (!e.target.closest(".searchbox")) $("sugg").hidden = true; });
+$("form").addEventListener("submit", function(e){ e.preventDefault(); submit(); });
 
-$("chips").innerHTML = DATA.map(function(c){ return '<button type="button" class="chip" data-n="'+c.name+'">'+c.name+'</button>'; }).join("");
-$("chips").addEventListener("click", function(e){ var n = e.target.getAttribute("data-n"); if (n) search(n); });
-$("form").addEventListener("submit", function(e){ e.preventDefault(); search($("q").value); });
-
-var d = new Date(), w = "日一二三四五六"[d.getDay()];
-$("today").textContent = "報告日期 " + d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate() + "（週" + w + "）";
-
-search("台積電");
+/* ========== 7. 啟動 ========== */
+if (!D) {
+  $("out").innerHTML = '<div class="msg">找不到資料檔 data/companies.js。請先執行 update_data.py，或確認 data 資料夾有一起上傳。</div>';
+} else {
+  var hot = ["2330", "2317", "2454", "2412", "2603", "2912"];
+  var byId = {}; D.companies.forEach(function(c){ byId[c.i] = c; });
+  hot.forEach(function(id){
+    if (!byId[id]) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = byId[id].n;
+    b.addEventListener("click", function(){ pick(byId[id]); }); $("chips").appendChild(b);
+  });
+  var d = new Date(), w = "日一二三四五六"[d.getDay()];
+  $("today").textContent = "今天 " + d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate() + "（週" + w + "） · 資料更新 " + D.updated.replace(/-/g, "/");
+  $("foot").textContent = "資料來源：臺灣證券交易所、證券櫃檯買賣中心公開資料（" + periodLabel(D.period) + "財報、月營收），共 " + D.companies.length + " 家上市櫃公司。白話解讀與產業說明為輔助理解，不是投資建議。";
+  var h = (location.hash || "").replace("#", "");
+  pick(byId[h] || byId["2330"]);
+}
 </script>
 
 </body>
